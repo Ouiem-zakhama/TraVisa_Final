@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        *{
+    margin: 0;
+    padding: 0;
+    font-family: Raleway;
+    
+}
+
+/* Header */
+header {
+  position: absolute;
+  width: 100%;
+  top: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 30px; /* Adjust padding for smaller screens */
+  transition: 0.5s;
+}
+
+.logo img {
+  width: 150px; /* Adjust logo size for smaller screens */
+ padding: 10px 55px; /* Adjust padding if needed */
+  
+}
+
+/* Navigation */
+.nav-link {
+  font-size: 16px; /* Adjust font size for smaller screens */
+  flex: 1;
+}
+
+.nav-link ul {
+  margin-left: 200px; /* Adjust margin depending on logo size */
+  display: inline;
+}
+
+.nav-link ul li {
+  list-style: none;
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px; /* Adjust font size for smaller screens */
+  margin-left: 10px;
+}
+
+.nav-link ul a {
+  color: rgb(255, 255, 255);
+  text-decoration: none;
+  font-size: 16px; /* Adjust font size for smaller screens */
+  text-align: center;
+}
+
+/*//////////////SIGNUP//////////////*/
+.signup-button {
+    background-color: transparent; /* White background */
+    border: 1px solid #86BBD8; /* Blue border */
+    border-radius: 26px; /* Rounded corners */
+    color: #86BBD8; /* Blue text */
+    padding: 10px 24px; /* Some padding */
+    text-align: center; /* Centered text */
+    text-decoration: none; /* No decoration */
+    display: inline-block; /* Make it an inline block */
+    font-size: 17px; /* Font size */
+    font-weight: bold; /* Bold text */
+    cursor: pointer; /* Make it a cursor pointer */
+    margin-left: 60px;
+  }
+  
+  .signup-button:hover {
+    background-color: #86BBD8; /* Blue background on hover */
+    color: #f0f0f0; /* White text on hover */
+  }
+
+/*//////////////LOGIN//////////////*/
+ /* Login Button */
+.login-button {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #86bbed;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+  font-size: 16px; /* Adjust font size for smaller screens */
+  border-bottom: 1px solid #86bbed;
+  margin-left: 15px;
+}
+
+  /*//////////////BG//////////////*/
+  /* Background Image */
+.imgbg {
+  width: 100%; /* Replace fixed width with 100% */
+  height: 100%;
+  background-size: cover; /* Ensure image covers the entire viewport */
+}
+
+
+  /*///////////////////////TEXT FEL BG///////////////////////*/
+
+  .title-home {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%; /* Adjust width for MacBook */
+    max-width: 600px; /* Set a max-width */
+    color: #86BBD8;
+    font-weight: bold;
+    font-size: 2.5rem; /* Adjust font size for MacBook */
+    text-align: center;
+}
+
+
+.title-home span{
+    color:#EDAA51;
+}
+.p-home{
+    position: absolute;
+    top: 47%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    object-fit: cover;
+    color: #ffffff;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    text-align: center;padding: 20px;
+}
+
+/*//////////////BTNNN TSAWER//////////////*/
+
+.bookhome-button{
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px 29px;
+    background-color: #EDAA51; /* White background */
+    border: 1px solid #EDAA51; /* Blue border */
+    border-radius: 26px; /* Rounded corners */
+    color: #ffffff; /* Blue text */
+    text-align: center; /* Centered text */
+    text-decoration: none; /* No decoration */
+    display: inline-block; /* Make it an inline block */
+    font-size: 18px; /* Font size */
+    cursor: pointer; /* Make it a cursor pointer */
+}
+
+/*//////////////GOOD MORNING BOX//////////////*/
+
+.box{
+    position: relative;
+    top: 85%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    height: 25%;
+    object-fit: cover;
+    margin-bottom: 0;
+}
+
+.morningh1{
+    position: absolute;
+    top: 100%;
+    left: 43%;
+    transform: translate(-50%, -50%);
+    width: 30%;
+    object-fit: cover;
+    color: #33658A;
+    font-weight: bold;
+    font-size: 50px;
+    
+}
+
+.p-morning{
+    position: absolute;
+    top: 109%;
+    left: 48%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    object-fit: cover;
+    color: #000000;
+    font-size: 20px;
+}
+
+.formbox{
+    position: absolute;
+    top: 116%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+
+
+        /*//////////////form//////////////*/
+
+.form-row{
+	display:flex;
+	width:42%;
+	margin:0 auto;
+    position: absolute;
+    top: 117%;
+    left: 49%;
+    transform: translate(-50%,-50%);
+    
+}
+
+.location{
+    position: absolute;
+    top: 7%;
+    left: 6%;
+    transform: translate(-50%,-50%);
+}
+.in{
+    position: absolute;
+    top: 7%;
+    left: 32%;
+    transform: translate(-50%,-50%);
+}
+.out{
+    position: absolute;
+    top: 7%;
+    left: 59%;
+    transform: translate(-50%,-50%);
+}
+.guest{
+    position: absolute;
+    top: 7%;
+    left: 83%;
+    transform: translate(-50%,-50%);
+}
+
+.search-btn {
+    position: absolute;
+    top: 37%;
+    left: 103%;
+    transform: translate(-50%,-50%);
+    
+
+}
+
+                /*//////////////icons//////////////*/
+.location-btn, .check-in-btn, .check-out-btn, .guests-btn{
+    width: 30px;
+    height: 30px;
+}
+
+.location-btn{
+    position: absolute;
+    top: 24%;
+    left: -1%;
+    transform: translate(-50%,-50%);
+}
+
+
+form input,form select{
+	display:block;
+	width:50%;
+	margin:15px 12px;
+	padding:5px;
+	font-size:15px;
+	outline: none;
+	border: none;
+	
+	font-weight: 45px;;
+}
+.form input[type= text],form input[type= number],form input::placeholder,select{
+	color:#9a9a9a;
+}
+
+
+/*//////////////POPULAR DESTINATIONS//////////////*/
+
+.popular-destinations {
+    color: #33658A;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-left: 5%;
+    margin-top: 0%;
+    font-family: Roboto;
+    letter-spacing: 2px;
+}
+
+#popular-destinations {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+}
+           
+#popular-destinations img {
+    width: 30%;
+    margin: 10px;
+}
+.line{
+    margin-left: 32.5%;
+}  
+#popular-destinations .imgdes1,
+#popular-destinations .imgdes2 {
+    z-index: 1;
+}
+      
+#popular-destinations .imgdes3 {
+    width: 30%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+      
+/*//////////////EXPLORE PLACES//////////////*/
+ 
+.explore-places {
+    color: #33658A;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-left: 5%;
+    margin-top: 2%;
+    font-family: Roboto;
+    letter-spacing: 2px;
+}
+
+table {
+    border-collapse: separate;
+    border-spacing: 20px;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 2.5%;;
+}
+
+.explore1 {
+    margin: 0;
+}
+        /*//////////////btn//////////////*/
+
+        .smallBtns{
+            font-size: 17px;
+            flex:1;
+        }
+        .smallBtns{
+            margin-left:1430px;
+            display:inline;
+        
+        }
+        .smallBtns li{
+            list-style:none;
+            display: inline-block;
+            padding: 10px 8px;
+            font-size: 17px;
+            margin-left: 10px;
+        }
+        .smallBtns a{
+            color:rgb(0, 0, 0);
+            text-decoration: none;
+            font-size: 17px;;
+            text-align: center;
+        }
+
+/*//////////////TESTIMONIALS//////////////*/
+
+.line4{
+    margin-left: 5%;
+    margin-top: 10%;
+}
+
+.testimonials{
+    position: absolute;
+    color: #EDAA51;
+    font-size: 17px;
+    font-family: Nanum Gothic;
+    font-weight: 400;
+    top: 327%;
+    left: 14%;
+    transform: translate(-50%, -50%);
+    letter-spacing: 2px;
+}
+.what{
+    color: #33658A;
+    font-size: 46px;
+    font-weight: bold;
+    margin-left: 5%;
+    margin-top: 3.5%;
+    font-family: Roboto;
+    letter-spacing: 2px;
+}
+
+.comment-p{
+    position: absolute;
+    top: 346%;
+    left: 25%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    object-fit: cover;
+    color: #000000;
+    font-size: 22px;
+    line-height: 1.6;
+}
+
+.marc{
+    position: absolute;
+    top: 366%;
+    left: 80%;
+    transform: translate(-50%, -50%);
+}
+
+.comment-p2{
+    position: absolute;
+    top: 381%;
+    left: 81%;
+    transform: translate(-50%, -50%);
+    width: 25%;
+    object-fit: cover;
+    color: #000000;
+    font-size: 22px;
+    line-height: 1.6;
+    font-weight: bold;
+}
+.name-p{
+    position: absolute;
+    top: 395%;
+    left: 71%;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    color: #000000;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/*//////////////FOOTER//////////////*/
+footer{
+    margin-left: 5%;
+    margin-top: 42%;
+    
+}
+
+.logo-footer{
+    width:200px;
+    padding:1px 1px;
+}
+
+
+
+.h4-footer{
+    position: absolute;
+    top: 422%;
+    left: 35.5%;
+    width: 400px;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+}
+
+.social-icons{
+    position: absolute;
+    top: 429%;
+    left: 29.5%;
+    transform: translate(-50%, -50%);
+}
+
+.table-footer2{
+    position: absolute;
+    top: 425%;
+    left: 70%;
+    transform: translate(-50%, -50%);
+}
+
+.linehr{
+    margin-bottom: 2%;
+    margin-top: 6%;
+    margin-left: -5.5%;
+}
+
+.containerf {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.copyright {
+    margin-bottom: 30px;
+    
+    font-size: 1.2em;
+}
+
+
+
+/* Custom Scroll Bar */
+html::-webkit-scrollbar{
+    width: 0rem;
+}
+html::-webkit-scrollbar-thumb{
+    background: transparent;
+}
+html::-webkit-scrollbar-track{
+    background: var(--text-color);
+    border-radius: 5rem;
+}
+section{
+    padding:50px 100px;
+}
+
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap">
+    <title>Travisa - Home</title>
+</head>
+<body>
+    <!------------------HEADER------------------>
+    <header>
+        <!--------------navbar-------------->
+        <a href="#" class="logo"><img class="logo" src="img/logo.png"></a>
+        <div class="nav-link">
+            <ul class="navbar">
+                <li><a href="#home" style="font-weight: bold; color: #86BBD8;";>Home</a></li>
+                <li><a href="#destinations">Destinations</a></li>
+                <li><a href="#trips">Trips</a></li>
+                <li><a href="voyage.html">Activities</a></li>
+                <button class="signup-button">Sign Up</button>
+                <button class="login-button">Login</button>
+            </ul>
+        </div>
+    </header>
+
+        <!--------------home-------------->
+    <img class="imgbg" src="img/bghome.png" >
+    <div class="overlay-container">
+        <h1 class="title-home"> Explore.<span> Discover.</span> Experience.</h1>
+        <p class="p-home">We're not just another website; we're your passport to extraordinary experiences. Whether you seek the serene beauty of secluded beaches, the thrill of vibrant city life, or the tranquility of untouched landscapes, we curate journeys that awaken your spirit of adventure.</p>
+        <button class="bookhome-button">Book Your Trip Now</button>
+    </div>
+
+        <!--------------good morning box-------------->
+    <div class="overlay-box">
+        <img class="box"  src="img/box.png">
+        <h1 class="morningh1">Good morning!</h1>
+        <p class="p-morning">Explore beautiful places in the world with TraVisa.</p>
+        <img class="formbox" src="img/form.png">
+    </div>
+
+    <!------------------BODY------------------>
+        <!--------------destination-------------->
+    <h1 class="popular-destinations">Most Popular Destinations</h1>
+    <section id="popular-destinations">
+        <img class="imgdes1" src="img/desB.png">
+        <img class="imgdes2" src="img/desB.png">
+        <img class="imgdes3" src="img/desB.png">
+    </section>
+
+<img class="line" src="img/line.png">
+        <!--------------explore-------------->
+    <h1 class="explore-places">Explore Places</h1>
+    <ul class="smallBtns">
+        <li><a href="#mountains" style="font-weight: bold; color: #EDAA51;";>Mountains</a></li>
+        <li><a href="#Beaches">Beaches</a></li>
+        <li><a href="#Icebergs">Icebergs</a></li>
+        <li><a href="#View" style="border-bottom: 1px solid #33658A; color:#33658A;">View all</a></li>
+    </ul>
+
+    <table  cellspacing="20">
+    <tr>
+        <td>
+            <img class="explore1" src="img/explore.png">
+        </td>
+        <td>
+            <img class="explore1" src="img/explore.png">
+        </td>
+        <td>
+            <img class="explore1" src="img/explore.png">
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img class="explore1" src="img/explore.png">
+        </td>
+        <td>
+            <img class="explore1" src="img/explore.png">
+        </td>
+        <td>
+            <img class="explore1" src="img/explore.png">
+        </td>
+    </tr>
+    </table>
+        <!--------------lform good morning box-------------->
+    <form>
+    <div class="form-row">
+        <img class="location-btn" src="img/location.png">
+        <h4 class="location">Location</h4>
+        <input type="text" placeholder="Add Location" id="location">
+
+        <img class="check-in-btn" src="img/calendar.png">
+        <h4 class="in">Check-in</h4>
+        <input type="Date" placeholder="check-in" id="chech-in">
+
+        <img class="check-out-btn" src="img/calendar.png">
+        <h4 class="out">Check-out</h4>
+        <input type="Date" placeholder="check-out" id="check-out">
+
+        <img class="guests-btn" src="img/guests.png">
+        <h4 class="guest">Guests</h4>
+        <input type="number" placeholder="Add guests" min="1" id="guests">
+        
+        <a href="#" class="search-btn"><img  class="search-btn" src="img/search-icon.png" ></a>
+    </div>
+    </form>
+        <!--------------testimonials-------------->
+    <img src="img/Line 4.png" class="line4">
+    <h4 class="testimonials">TESTIMONIALS</h4>
+    <h1 class="what">What They Say?</h1>
+    <p class="comment-p">TraVisa has got more than 100k positive ratings from<br> all around the world.</p>
+    <img class="marc" src="img/marc.png">
+    <p class="comment-p2">Euismod faucibus turpis eu gravida mi. Pellentesque et velit aliquam sed faucib turpis eu gravida mi. Pellentesque et velit aliquam sed mi.</p>
+    <p class="name-p">Gloria Rose</p>
+
+<footer>
+    <img class="logo-footer" src="img/logo.png">
+    
+    <div class="footer-content">
+        <div class="footer-text">
+            <h4 class="h4-footer">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</h4>
+            <img class="social-icons" src="img/social-icons.png">
+        </div>
+        <div class="table-footer2">
+            <table>
+                <tr >
+                    <td>
+                        <h4>MENU</h4>
+                    </td>
+                    <td>
+                        <h4>LEGAL</h4>
+                    </td>
+                    <td>
+                        <h4>CONTACT</h4>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Home</td>
+                    <td>Terms and Conditions</td>
+                    <td>support@minimals.cc</td>
+                </tr>
+                <tr>
+                    <td>Team</td>
+                    <td>Privacy Policy</td>
+                    <td>Los Angeles,359 Hidden Valley Road</td>
+                </tr>
+                <tr>
+                    <td>About us</td>
+                    <td></td>
+                    <td>+908 89097 890</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td><img src="img/flag.png" class="flag"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+        <hr class="linehr">
+        <div class="containerf">
+            <p class="copyright">&copy; 2023 All rights Reserved</p>
+        </div>
+</footer>
+      <script src="home_travisa/view/frontend/js/home.js"></script>
+</body>
+</html>

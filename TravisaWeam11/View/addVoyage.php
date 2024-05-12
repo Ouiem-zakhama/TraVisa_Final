@@ -14,7 +14,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $motivation = $_POST['Motivation'];
     $moyen_transport = $_POST['moyenTransport'];
     $voyageC = new voyageC();
-    $result = $voyageC->addVoyage($id_voy, $titre, $id_des, $date_debut, $date_fin, $prix, $description, $motivation, $moyen_transport);
+    $result = $voyageC->addVoyage($id_voy, $titre, $id_des, $date_debut, $date_fin, $prix, $description, $motivation, $moyen_transport , "nonsuprime");
     if ($result) {
         header("Location: backoffice.php");
         exit();

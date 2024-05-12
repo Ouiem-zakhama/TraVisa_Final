@@ -1,9 +1,24 @@
 <?php
 include '../Controller/voyageC.php';
+include '../Controller/destinationC.php';
+include '../tables.php';
+
+
 $voy1= new voyageC();
-$ListVoyages = $voy1->list_voyage();
-//$des1= new destinationC();
-//$ListDestination = $des1->list_Destination();
+$ListVoyages = $voy1->getVoyageByEtat("nonsuprime");
+$des1= new destinationC();
+$ListDestination = $des1->list_Destination1();
+$ListDestination2  = $des1->list_Destination();
+
+// Generate travel statistics
+$travelStatistics = $voy1->generateTravelStatistics();
+
+// Convert travel statistics data to JSON format for JavaScript charting
+$travelCountByDestinationJSON = json_encode($travelStatistics['travel_count_by_destination']);
+$avgTravelPriceByDestinationJSON = json_encode($travelStatistics['avg_travel_price_by_destination']);
+$travelCountByTransportJSON = json_encode($travelStatistics['travel_count_by_transport']);
+$mostFrequentDurationByTransportJSON = json_encode($travelStatistics['most_frequent_duration_by_transport']);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -23,22 +38,92 @@ $ListVoyages = $voy1->list_voyage();
   <link href="./assets/css/nucleo-svg.css" rel="stylesheet" />
   <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.11.4/i18n/French.json"></script>
   <link href="./assets/css/nucleo-svg.css" rel="stylesheet" />
   <!-- CSS Files -->
   <link id="pagestyle" href="./assets/css/argon-dashboard.css?v=2.0.4" rel="stylesheet" />
- 
-</head>
+  <title>Mini-carte de localisation</title>
+     <!-- Inclure la bibliothèque Google Maps API -->
+     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5GF7-lMCCPrMtNWpc1x6LJQvyxh6IPOk&callback=initMap" async defer></script>
+    <style>
+        /* Définir une taille pour la carte */
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+    <script>
+        // Fonction d'initialisation de la carte
+        function initMap() {
+            // Création d'une nouvelle carte Google Maps
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15, // Zoom par défaut
+                mapTypeControl: true,
+                streetViewControl: true,
+                fullscreenControl: true
+            });
 
+            // Essayer d'obtenir la position actuelle de l'utilisateur
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var userCoords = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    map.setCenter(userCoords);
+                }, function() {
+                    // Gérer les erreurs de géolocalisation
+                    handleLocationError(true, map.getCenter());
+                });
+            } else {
+                // Le navigateur ne prend pas en charge la géolocalisation
+                handleLocationError(false, map.getCenter());
+            }
+
+            // Création d'un marqueur pour marquer l'ESPRIT Tunisia sur la carte
+            var espirtMarker = new google.maps.Marker({
+                position: { lat: 36.899345262092005, lng: 10.189394119430952 },
+                map: map,
+                title: 'ESPRIT Tunisia',
+                icon: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' // Utilisation d'un marqueur personnalisé
+            });
+
+            // Ajouter une info-bulle à l'ESPRIT Tunisia
+            var infowindow = new google.maps.InfoWindow({
+                content: '<strong>ESPRIT Tunisia</strong><br>ESPRIT Tunisia'
+            });
+            espirtMarker.addListener('click', function() {
+                infowindow.open(map, espirtMarker);
+            });
+        }
+
+        // Fonction pour gérer les erreurs de géolocalisation
+        function handleLocationError(browserHasGeolocation, coords) {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: coords,
+                zoom: 15
+            });
+            var infoWindow = new google.maps.InfoWindow({
+                content: browserHasGeolocation ?
+                    "Erreur: Le service de géolocalisation a échoué." :
+                    "Erreur: Votre navigateur ne prend pas en charge la géolocalisation."
+            });
+            var userMarker = new google.maps.Marker({ position: coords, map: map });
+            infoWindow.open(map);
+        }
+    </script>
+</head>
+<!-- Div pour afficher la carte -->
+<div id="map"></div>
 <body class="g-sidenav-show   bg-gray-100">
   <div class="min-height-300 bg-primary position-absolute w-100"></div>
-  <aside
-    class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4 "
-    id="sidenav-main">
+  <aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4 " id="sidenav-main">
     <div class="sidenav-header">
-      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
-        aria-hidden="true" id="iconSidenav"></i>
-      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/argon-dashboard/pages/dashboard.html "
-        target="_blank">
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+      <a class="navbar-brand m-0" href=" https://demos.creative-tim.com/argon-dashboard/pages/dashboard.html " target="_blank">
         <img src="./assets/img/Travisa/LogoTravisa.png" class="navbar-brand-img h-100" alt="main_logo" width="50" height="50">
         <span class="ms-1 font-weight-bold">TraVisa</span>
       </a>
@@ -48,17 +133,15 @@ $ListVoyages = $voy1->list_voyage();
       <ul class="navbar-nav">
         <li class="nav-item">
           <a class="nav-link active" href="./pages/dashboard.html">
-            <div
-              class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-tv-2 text-primary text-sm opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">Dashboard</span>
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link " href="./pages/tables.html">
-            <div
-              class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+          <a class="nav-link " href="./tabels.php">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-calendar-grid-58 text-warning text-sm opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">Tables</span>
@@ -66,8 +149,7 @@ $ListVoyages = $voy1->list_voyage();
         </li>
         <li class="nav-item">
           <a class="nav-link " href="./pages/billing.html">
-            <div
-              class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-credit-card text-success text-sm opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">Billing</span>
@@ -75,8 +157,7 @@ $ListVoyages = $voy1->list_voyage();
         </li>
         <li class="nav-item">
           <a class="nav-link " href="./pages/virtual-reality.html">
-            <div
-              class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-app text-info text-sm opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">Virtual Reality</span>
@@ -84,8 +165,7 @@ $ListVoyages = $voy1->list_voyage();
         </li>
         <li class="nav-item">
           <a class="nav-link " href="./pages/rtl.html">
-            <div
-              class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-world-2 text-danger text-sm opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">RTL</span>
@@ -96,8 +176,7 @@ $ListVoyages = $voy1->list_voyage();
         </li>
         <li class="nav-item">
           <a class="nav-link " href="./pages/profile.html">
-            <div
-              class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">Profile</span>
@@ -105,8 +184,7 @@ $ListVoyages = $voy1->list_voyage();
         </li>
         <li class="nav-item">
           <a class="nav-link " href="./pages/sign-in.html">
-            <div
-              class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-single-copy-04 text-warning text-sm opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">Sign In</span>
@@ -114,8 +192,7 @@ $ListVoyages = $voy1->list_voyage();
         </li>
         <li class="nav-item">
           <a class="nav-link " href="./pages/sign-up.html">
-            <div
-              class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
               <i class="ni ni-collection text-info text-sm opacity-10"></i>
             </div>
             <span class="nav-link-text ms-1">Sign Up</span>
@@ -137,13 +214,17 @@ $ListVoyages = $voy1->list_voyage();
           </ol>
           <h6 class="font-weight-bolder text-white mb-0">Dashboard</h6>
         </nav>
+                                      <!-- START SERACH -->
         <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
-          <div class="ms-md-auto pe-md-3 d-flex align-items-center">
-            <div class="input-group">
-              <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
-              <input type="text" class="form-control" placeholder="Type here...">
-            </div>
-          </div>
+  <div class="ms-md-auto pe-md-3 d-flex align-items-center">
+    <div class="input-group">
+      <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
+      <input type="text" class="form-control" name="search" id="search" placeholder="Type here...">
+      <button id="searchButton" class="btn btn-primary">Search</button>
+    </div>
+  </div>
+</div>
+                                           <!-- END SERACH -->
           <ul class="navbar-nav  justify-content-end">
             <li class="nav-item d-flex align-items-center">
               <a href="javascript:;" class="nav-link text-white font-weight-bold px-0">
@@ -352,9 +433,10 @@ $ListVoyages = $voy1->list_voyage();
           </div>
         </div>
       </div>
-      
+                          <!-- Trip -->
+      <!-- a partir mena -->
       <div class="row mt-4">
-        <div class="col-lg-7 mb-lg-0 mb-4">
+        <div class="col-lg-12 mb-lg-0 mb-4"> <!-- col-lg-7 should take up 7 columns out of 12 available in a large screen (lg) viewport -->
           <div class="card z-index-2 h-100">
             <div class="card-header pb-0 pt-3 bg-transparent">
               <h6 class="text-capitalize">Trips</h6>
@@ -362,8 +444,27 @@ $ListVoyages = $voy1->list_voyage();
                 <i class="fa fa-arrow-up text-success"></i>
                 <span class="font-weight-bold"></span>
               </p>
-              <button class="btn btn-primary" id="addVoyageBtn">Add Voyage</button>
+              <button class="btn btn-primary" id="addVoyageBtn">Add Trip</button>
+              <button class="btn btn-primary" onclick="exportToPDF()">Export to PDF</button>
+              <button class="btn btn-primary" id="log-btn">View Log History</button>
             </div>
+            <div id="log-popup" class="log-popup">
+                      <div class="log-content" id="log-content">
+                          <!-- Log history will be displayed here -->
+                          <?php
+                          $VOYY = new voyageC();
+                          $log_entries = $VOYY->fetchLogEntries();
+                          if ($log_entries) {
+                              foreach ($log_entries as $log_entry) {
+                                  echo "<p>{$log_entry['operation']} item with ID {$log_entry['item_id']} at {$log_entry['timestamp']}</p>";
+                              }
+                          } else {
+                              echo "Failed to fetch log entries.";
+                          }
+                          ?>
+                      </div>
+                      <button id="close-btn">Close</button>
+                  </div>
             <div class="card-body p-3">
               <div class="table-responsive">
               
@@ -372,14 +473,15 @@ $ListVoyages = $voy1->list_voyage();
                     <?php echo $ListVoyages; ?>
                     <div id="deleteConfirmation" class="popup">
                         <div class="popup-content">
-                            <p>Are you sure you want to delete this user?</p>
-                            <button id="confirmDelete">Yes</button>
-                            <button id="cancelDelete">Cancel</button>
+                            <p>Are you sure you want to delete this Trip ?</p>
+                            <button id="confirmDelete">Yes</button><button id="cancelDelete">Cancel</button>
                         </div>
                     </div>
-                    <!-- Pop-up for update -->
+                    <!-- Pop-up for update VOYAGE -->
                     <div id="updatePopup" class="popup">
                         <div class="popup-content">
+                       
+
                         <span class="close" onclick="closeUpdatePopup()">&times;</span>
                         <h2>Update Trip</h2>
                             <!-- Form for updating voyage data -->
@@ -391,9 +493,15 @@ $ListVoyages = $voy1->list_voyage();
                               <div id="updateTitreError" class="error-msg"></div>
 
                               <!-- Destination ID -->
-                              <label for="updateIdDes">ID Des:</label>
-                              <input type="number" id="updateIdDes" name="updateIdDes" required>
-                              <div id="updateIdDesError" class="error-msg"></div>
+                              <label for="updateDes">Destination:</label>
+                              <select name="updateDes" id="updateDes" required>
+                                  <?php foreach ($ListDestination as $destination) : ?>
+                                      <option value="<?php echo $destination['id_des']; ?>">
+                                          <?php echo $destination['nom_ville'] . ', ' . $destination['pays']; ?>
+                                      </option>
+                                  <?php endforeach; ?>
+                              </select>
+                              <div id="updateDesError" class="error-msg"></div>
 
                               <!-- Start Date -->
                               <label for="updateDateDebut">Date Début:</label>
@@ -435,8 +543,7 @@ $ListVoyages = $voy1->list_voyage();
                                   <option value="Bus">Bus</option>
                               </select>
                               <div id="updateMoyenTransportError" class="error-msg"></div>
-
-                                <button type="submit">Confirm Update</button>
+                              <button type="submit">Confirm Update</button>
                             </form>
                         </div>
                     </div>
@@ -447,6 +554,121 @@ $ListVoyages = $voy1->list_voyage();
             </div>
           </div>
         </div>
+        <!-- lena -->
+                        <!-- Destination -->
+        <div class="row mt-4">
+          <div class="col-lg-12 mb-lg-0 mb-4">
+            <div class="card z-index-2 h-100">
+             <div class="card-header pb-0 pt-3 bg-transparent">
+             <h6 class="text-capitalize">Destinations</h6>
+             <p class="text-sg mb-0">
+                <i class="fa fa-arrow-up text-success"></i>
+                <span class="font-weight-bold"></span>
+              </p>
+              <button class="btn btn-primary" id="addDestinationBtn">Add Destination</button>
+              <div class="card-body p-3">
+              <div class="table-responsive">
+              
+                <table class="table align-items-center ">
+                  <tbody>
+                  <?php echo $ListDestination2; ?>
+                    <div id="deleteConfirmation_Des" class="popup">
+                        <div class="popup-content">
+                            <p>Are you sure you want to delete this Destination?</p>
+                            <button id="confirmDelete_Des">Yes</button><button id="cancelDelete_Des">Cancel</button>
+                        </div>
+                    </div>
+                   <!-- Pop-up for update DESTINATION-->
+                   <div id="updatePopup_Des" class="popup">
+                        <div class="popup-content">
+                        <span class="close" onclick="closeUpdatePopup_Des()">&times;</span>
+                        <h2>Update Destination</h2>
+                            <!-- Form for updating Destination data -->
+                            <form id="updateForm_Des" action="updateDestionation.php" method="post">
+                                <input type="hidden" id="updateIdDes" name=updateIdDes value="">
+                              <!-- Town -->
+                              <label for="updateTown">Town :</label>
+                              <input type="text" id="updateTown" name="updateTown" required>
+                              <div id="updateTownError" class="error-msg"></div>
+
+                              <!-- Detailed_Description  -->
+                              <label for="updateDescriptions">Detailed Description:</label>
+                              <input type="text" id="updateDescriptions" name="updateDescriptions" required>
+                              <div id="updateDescriptionsError" class="error-msg"></div>
+
+                              <!-- GPS -->
+                              <label for="updateGPS">GPS:</label>
+                              <input type="text" id="updateGPS" name="updateGPS" required>
+                              <div id="updateGPSError" class="error-msg"></div>
+
+                             <!-- Country -->
+                              <label for="updateCountry">Country:</label>
+                              <input type="text" id="updateCountry" name="updateCountry" required>
+                              <div id="updateCountryError" class="error-msg"></div>
+
+
+                              <!-- Language -->
+                              <label for="updateLangue">Language:</label>
+                              <select id="updateLangue" name="updateLangue" required>
+                                    <option value="Mandarin Chinese">Mandarin Chinese</option>
+                                    <option value="Spanish">Spanish</option>
+                                    <option value="English">English</option>
+                                    <option value="Hindi">Hindi</option>
+                                    <option value="Arabic">Arabic</option>
+                                    <option value="French">French</option>
+                                    <option value="Russian">Russian</option>
+                                    <option value="Japanese">Japanese</option>
+                                    <option value="Portuguese">Portuguese</option>
+                                </select>
+                              <div id="updateLangueError" class="error-msg"></div>
+
+                              <!-- Category -->
+                              <label for="updateCategory">Category:</label>
+                              
+                              <select id="updateCategory" name="updateCategory" required>
+                                <option value="Adventure">Adventure</option>
+                                <option value="Nature">Nature</option>
+                                <option value="Culturel">Culturel</option>
+                              </select>
+                              <div id="updateCategoryError" class="error-msg"></div>
+
+                              <!-- Purpose -->
+                              <label for="updatePurpose">Purpose:</label>
+                              <select id="updatePurpose" name="updatePurpose" required>
+                                  <option value="Leisure and Recreation">Leisure and Recreation</option>
+                                  <option value="Adventure and Exploration">Adventure and Exploration</option>
+                                  <option value="Education and Learning">Education and Learning</option>
+                                  <option value="Volunteer and Humanitarian Work">Volunteer and Humanitarian Work</option>
+                                  <option value="Events">Events</option>
+                              </select>
+                              <div id="updatePurposeError" class="error-msg"></div>
+
+                              <!-- Climat -->
+                            <label for="updateClimat">Climat:</label>
+                            <select id="updateClimat" name="updateClimat" required>
+                              <option value="Tropical"> Tropical </option>
+                              <option value="Arid/Desert">Arid/Desert</option>
+                              <option value="Polar"> Polar </option>
+                              <option value="Subtropical"> Subtropical </option>
+                              <option value="Mediterranean"> Mediterranean </option>
+                              <option value="Mountainous/Alpine"> Mountainous/Alpine </option>
+                              <option value="Continental"> Continental </option>
+                              <option value="Oceanic"> Oceanic </option>
+                            </select>
+                            <div id="updateClimatError" class="error-msg"></div>
+                             <button type="submit">Confirm Update </button>
+                             </form>
+                        </div>
+                    </div>
+
+                  </tbody>
+                </table>
+             </div>
+            </div>
+          </div>
+        </div>
+     
+        
         <div class="col-lg-5">
           <div class="card card-carousel overflow-hidden h-100 p-0">
             <div id="carouselExampleCaptions" class="carousel slide h-100" data-bs-ride="carousel">
@@ -498,7 +720,7 @@ $ListVoyages = $voy1->list_voyage();
         </div>
       </div>
         <!-- Add button for adding a new voyage -->
-
+        
 
 <!-- Pop-up for adding a new voyage -->
 <!-- Pop-up for adding a new voyage -->
@@ -518,8 +740,18 @@ $ListVoyages = $voy1->list_voyage();
             <div id="titreError" class="error-msg"></div>
 
             <!-- Destination ID -->
-            <label for="idDes">Destination ID:</label>
-            <input type="number" id="idDes" name="idDes" required>
+            <label for="idDes">Destination:</label>
+            <select name="idDes" id="idDes" required>
+                <?php foreach ($ListDestination as $destination) : ?>
+                    <option value="<?php echo $destination['id_des']; ?>">
+                        <?php echo $destination['nom_ville'] . ', ' . $destination['pays']; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <div id="idDesError" class="error-msg"></div>
+
+
+            <!--<input type="number" id="idDes" name="idDes" required>-->
             <div id="idDesError" class="error-msg"></div>
 
             <!-- Start Date -->
@@ -568,146 +800,114 @@ $ListVoyages = $voy1->list_voyage();
     </div>
 </div>
 
+ <!-- Add button for adding a new Destination  -->
+    <!-- Pop-up for adding a new Destination -->
+    <!-- Pop-up for adding a new Destination -->
+    <div id="addDestinationPopup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="closeAddDestinationPopup()">&times;</span>
+        <h2>Add Destination</h2>
+        <form id="addDestinationForm" method="post" action="addDestination.php">
+            <!-- ID Destination -->
+            <label for="idDes_Des">Destination ID:</label>
+            <input type="number" id = "idDes_Des" name="idDes_Des" required>
+            <div id="idDes_DesError" class="error-msg"></div>
+
+            <!-- Town -->
+            <label for="Town">Town:</label>
+            <input type="text" id="Town" name="Town" required>
+            <div id="TownError" class="error-msg"></div>
+
+            <!-- Detailed Description -->
+            <label for=“Det_Description”>Detailed Description :</label>
+            <input type=“text” id="Det_Description" name="Det_Description" required>
+            <div id="Det_DescriptionError" class="error-msg"></div>
+
+            <!-- GPS -->
+            <label for="GPS">GPS:</label>
+            <input type="text" id="GPS" name="GPS" required>
+            <div id="GPSError" class="error-msg"></div>
+
+            <!-- Country -->
+            <label for="Country">Country:</label>
+            <input type=“text” id="Country" name="Country" required>
+            <div id="CountryError" class="error-msg"></div>
+
+            <!-- Language -->
+            <label for="Language">Language:</label>
+            <select id="Language" name="Language" required>
+                <option value="Mandarin Chinese">Mandarin Chinese</option>
+                <option value="Spanish">Spanish</option>
+                <option value="English">English</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Arabic">Arabic</option>
+                <option value="French">French</option>
+                <option value="Russian">Russian</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Portuguese">Portuguese</option>
+            </select>
+            <div id="LanguageError" class="error-msg"></div>
+
+            <!-- Category -->
+            <label for="Category">Category:</label>
+            <select id="Category" name="Category" required>
+              <option value="Adventure">Adventure</option>
+              <option value="Nature">Nature</option>
+              <option value="Culturel">Culturel</option>
+             </select>
+            <div id="CategoryError" class="error-msg"></div>
+
+            <!-- Purpose -->
+            <label for="Purpose">Purpose:</label>
+            <select id="Purpose" name="Purpose" required>
+                <option value="Leisure and Recreation">Leisure and Recreation</option>
+                <option value="Adventure and Exploration">Adventure and Exploration</option>
+                <option value="Education and Learning">Education and Learning</option>
+                <option value="Volunteer and Humanitarian Work">Volunteer and Humanitarian Work</option>
+                <option value="Events">Events</option>
+            </select>
+            <div id="PurposeError" class="error-msg"></div>
+
+            <!-- Climat -->
+            <label for="Climat">Climat:</label>
+            <select id="Climat" name="Climat" required>
+       <option value="Tropical"> Tropical </option>
+                              <option value="Arid/Desert">Arid/Desert</option>
+                              <option value="Polar"> Polar </option>
+                              <option value="Subtropical"> Subtropical </option>
+                              <option value="Mediterranean"> Mediterranean </option>
+                              <option value="Mountainous/Alpine"> Mountainous/Alpine </option>
+                              <option value="Continental"> Continental </option>
+                              <option value="Oceanic"> Oceanic </option>
+            </select>
+            <div id="ClimatError" class="error-msg"></div>
+
+            <button type="submit">Add Destination</button>
+        </form>
+    </div>
+</div>
+                                    <!-- MENAAA -->
       <div class="row mt-4">
         <div class="col-lg-7 mb-lg-0 mb-4">
           <div class="card ">
             <div class="card-header pb-0 p-3">
               <div class="d-flex justify-content-between">
-                <h6 class="mb-2">Sales by Country</h6>
+                <h6 class="mb-2">Statistics By Date</h6>
+                <div style="width: 50%; margin: auto;">
+        <!-- Display count of users by role as a bar chart -->
+        
+        <canvas id="travelCountChart"></canvas>
+        <canvas id="avgTravelPriceChart"></canvas>
+        <canvas id="travelCountByTransportChart"></canvas>
+        <canvas id="mostFrequentDurationByTransport"></canvas>
+       
+    </div>
               </div>
             </div>
-            <div class="table-responsive">
-              <table class="table align-items-center ">
-                <tbody>
-                  <tr>
-                    <td class="w-30">
-                      <div class="d-flex px-2 py-1 align-items-center">
-                        <div>
-                          <img src="./assets/img/icons/flags/US.png" alt="Country flag">
-                        </div>
-                        <div class="ms-4">
-                          <p class="text-xs font-weight-bold mb-0">Country:</p>
-                          <h6 class="text-sm mb-0">United States</h6>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="text-center">
-                        <p class="text-xs font-weight-bold mb-0">Sales:</p>
-                        <h6 class="text-sm mb-0">2500</h6>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="text-center">
-                        <p class="text-xs font-weight-bold mb-0">Value:</p>
-                        <h6 class="text-sm mb-0">$230,900</h6>
-                      </div>
-                    </td>
-                    <td class="align-middle text-sm">
-                      <div class="col text-center">
-                        <p class="text-xs font-weight-bold mb-0">Bounce:</p>
-                        <h6 class="text-sm mb-0">29.9%</h6>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="w-30">
-                      <div class="d-flex px-2 py-1 align-items-center">
-                        <div>
-                          <img src="./assets/img/icons/flags/DE.png" alt="Country flag">
-                        </div>
-                        <div class="ms-4">
-                          <p class="text-xs font-weight-bold mb-0">Country:</p>
-                          <h6 class="text-sm mb-0">Germany</h6>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="text-center">
-                        <p class="text-xs font-weight-bold mb-0">Sales:</p>
-                        <h6 class="text-sm mb-0">3.900</h6>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="text-center">
-                        <p class="text-xs font-weight-bold mb-0">Value:</p>
-                        <h6 class="text-sm mb-0">$440,000</h6>
-                      </div>
-                    </td>
-                    <td class="align-middle text-sm">
-                      <div class="col text-center">
-                        <p class="text-xs font-weight-bold mb-0">Bounce:</p>
-                        <h6 class="text-sm mb-0">40.22%</h6>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="w-30">
-                      <div class="d-flex px-2 py-1 align-items-center">
-                        <div>
-                          <img src="./assets/img/icons/flags/GB.png" alt="Country flag">
-                        </div>
-                        <div class="ms-4">
-                          <p class="text-xs font-weight-bold mb-0">Country:</p>
-                          <h6 class="text-sm mb-0">Great Britain</h6>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="text-center">
-                        <p class="text-xs font-weight-bold mb-0">Sales:</p>
-                        <h6 class="text-sm mb-0">1.400</h6>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="text-center">
-                        <p class="text-xs font-weight-bold mb-0">Value:</p>
-                        <h6 class="text-sm mb-0">$190,700</h6>
-                      </div>
-                    </td>
-                    <td class="align-middle text-sm">
-                      <div class="col text-center">
-                        <p class="text-xs font-weight-bold mb-0">Bounce:</p>
-                        <h6 class="text-sm mb-0">23.44%</h6>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="w-30">
-                      <div class="d-flex px-2 py-1 align-items-center">
-                        <div>
-                          <img src="./assets/img/icons/flags/BR.png" alt="Country flag">
-                        </div>
-                        <div class="ms-4">
-                          <p class="text-xs font-weight-bold mb-0">Country:</p>
-                          <h6 class="text-sm mb-0">Brasil</h6>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="text-center">
-                        <p class="text-xs font-weight-bold mb-0">Sales:</p>
-                        <h6 class="text-sm mb-0">562</h6>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="text-center">
-                        <p class="text-xs font-weight-bold mb-0">Value:</p>
-                        <h6 class="text-sm mb-0">$143,960</h6>
-                      </div>
-                    </td>
-                    <td class="align-middle text-sm">
-                      <div class="col text-center">
-                        <p class="text-xs font-weight-bold mb-0">Bounce:</p>
-                        <h6 class="text-sm mb-0">32.14%</h6>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            
           </div>
         </div>
+        <!-- LENAAA -->
         <div class="col-lg-5">
           <div class="card">
             <div class="card-header pb-0 p-3">
@@ -912,14 +1112,17 @@ $ListVoyages = $voy1->list_voyage();
 
                     .popup-content {
                         position: absolute;
-                        top: 50%;
-                        left: 50%;
+                        top: 50%; left: 50%;
                         transform: translate(-50%, -50%);
                         background-color: white;
                         padding: 30px;
-                        border-radius: 5px;
+                        border-radius: 20px;
                         box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
                     }
+                    .close {
+                        font-size: 24px; /* Adjust the font size to make the "x" larger */
+                         line-height: 0; /* Ensure the line height is normal */
+                   }
                     /* Style for form container */
                     .form-container {
                         width: 30px; /* Adjust width as needed */
@@ -930,26 +1133,12 @@ $ListVoyages = $voy1->list_voyage();
                       label {
                         display: inline-block;
                         width: 40%; /* Adjust width as needed */
-                        margin-bottom: 3px;
+                        margin-bottom: 10px;
                       }
 
                       /* Style for form inputs and selects */
                       input[type="text"],
-                      select {
-                        width: 55%; /* Adjust width as needed */
-                        padding: 2px;
-                        margin-bottom: 2px;
-                        box-sizing: border-box;
-                        display: inline-block;
-                      }
                       input[type="date"],
-                      select {
-                        width: 55%; /* Adjust width as needed */
-                        padding: 2px;
-                        margin-bottom: 2px;
-                        box-sizing: border-box;
-                        display: inline-block;
-                      }
                       input[type="number"],
                       select {
                         width: 55%; /* Adjust width as needed */
@@ -958,11 +1147,11 @@ $ListVoyages = $voy1->list_voyage();
                         box-sizing: border-box;
                         display: inline-block;
                       }
-                      
-
+                    
+        
                     .popup button {
                       width: 50%;
-                      padding: 2px;
+                      padding: 3px;
                       background-color: #4CAF50;
                       color: white;
                       border: none;
@@ -975,6 +1164,41 @@ $ListVoyages = $voy1->list_voyage();
                     .popup button:hover {
                         background-color: #45a049;
                     }
+                    .log-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.log-content {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#close-btn {
+    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#close-btn:hover {
+    background-color: #45a049;
+}
 
                       </style>
   <!--   Core JS Files   -->
@@ -1080,7 +1304,21 @@ $ListVoyages = $voy1->list_voyage();
   <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="./assets/js/argon-dashboard.min.js?v=2.0.4"></script>
   <!-- Add this JavaScript code to your HTML file -->
-<script>
+  
+                    <!--------------------------------------------------------------------------------->
+                                         <!-- Delete Voyage  -->
+                    <!--------------------------------------------------------------------------------->
+
+                    <script>
+    document.getElementById('log-btn').addEventListener('click', function() {
+        document.getElementById('log-popup').style.display = 'block';
+    });
+
+    document.getElementById('close-btn').addEventListener('click', function() {
+        document.getElementById('log-popup').style.display = 'none';
+    });
+</script>
+<script> 
     // Function to handle delete confirmation
     function confirmDeleteVoyage(voyageId) {
         // Show the confirmation pop-up
@@ -1110,13 +1348,15 @@ $ListVoyages = $voy1->list_voyage();
         });
     });
 </script>
-
+                  <!--------------------------------------------------------------------------------->
+                                            <!-- Update Voyage  -->
+                  <!--------------------------------------------------------------------------------->    
   <script>
   // Function to open the update pop-up with current voyage information
 function openUpdatePopup(voyageId, titre, idDes, dateDebut, dateFin, prix, description, motivation, moyenTransport) {
     document.getElementById('updateIdVoy').value = voyageId;
     document.getElementById('updateTitre').value = titre;
-    document.getElementById('updateIdDes').value = idDes;
+    document.getElementById('updateDes').value = idDes;
     document.getElementById('updateDateDebut').value = dateDebut;
     document.getElementById('updateDateFin').value = dateFin;
     document.getElementById('updatePrix').value = prix;
@@ -1128,6 +1368,7 @@ function openUpdatePopup(voyageId, titre, idDes, dateDebut, dateFin, prix, descr
 function closeUpdatePopup() {
     document.getElementById('updatePopup').style.display = 'none';
 }
+
 // Event listener for update buttons
 document.addEventListener('DOMContentLoaded', function() {
     const updateButtons = document.querySelectorAll('.btn-update');
@@ -1152,7 +1393,7 @@ const updateForm = document.getElementById('updateForm');
 updateForm.addEventListener('submit', function(event) {
     // Reset error messages
     document.getElementById('updateTitreError').textContent = '';
-    document.getElementById('updateIdDesError').textContent = '';
+    document.getElementById('updateDesError').textContent = '';
     document.getElementById('updateDateDebutError').textContent = '';
     document.getElementById('updateDateFinError').textContent = '';
     document.getElementById('updatePrixError').textContent = '';
@@ -1162,7 +1403,7 @@ updateForm.addEventListener('submit', function(event) {
 
     // Validate form inputs
     const titre = document.getElementById('updateTitre').value;
-    const idDes = document.getElementById('updateIdDes').value;
+    const idDes = document.getElementById('updateDes').value;
     const dateDebut = document.getElementById('updateDateDebut').value;
     const dateFin = document.getElementById('updateDateFin').value;
     const prix = document.getElementById('updatePrix').value;
@@ -1182,10 +1423,10 @@ updateForm.addEventListener('submit', function(event) {
     // Validation for idDes (not empty, maximum 4 numbers, no letters)
     if (idDes.trim() === '') {
         event.preventDefault();
-        document.getElementById('updateIdDesError').textContent = 'Destination ID is required';
+        document.getElementById('updateDesError').textContent = 'Destination ID is required';
     } else if (!/^\d{1,4}$/.test(idDes)) {
         event.preventDefault();
-        document.getElementById('updateIdDesError').textContent = 'Destination ID must be maximum 4 digits';
+        document.getElementById('updateDesError').textContent = 'Destination ID must be maximum 4 digits';
     }
 
     // Validation for dateDebut (must be superior to today's date)
@@ -1223,6 +1464,9 @@ updateForm.addEventListener('submit', function(event) {
 
 
 </script>
+                  <!--------------------------------------------------------------------------------->
+                                            <!-- ADD Voyage  -->
+                  <!--------------------------------------------------------------------------------->    
 <script>
   function closeAddPopup() {
     document.getElementById('addVoyagePopup').style.display = 'none';
@@ -1313,6 +1557,329 @@ updateForm.addEventListener('submit', function(event) {
         });
     });
 </script>
+                    <!--------------------------------------------------------------------------------->
+                    <!-- --------------------------Delete Destination-------------------------- -->
+                    <!-------------------------------------------------------------------------------->
+ <script>
+    // Function to handle delete confirmation
+    function confirmDeleteDestination(DestinationId) {
+        // Show the confirmation pop-up
+        document.getElementById('deleteConfirmation_Des').style.display = 'block';
+
+        // Set event listeners for confirmation buttons
+        document.getElementById('confirmDelete_Des').addEventListener('click', function() {
+            // Redirect to deleteVoyage.php with DestinationId as a query parameter
+            window.location.href = 'deleteDestination.php?id_des=' + DestinationId;
+        });
+
+        document.getElementById('cancelDelete_Des').addEventListener('click', function() {
+            // Hide the confirmation pop-up
+            document.getElementById('deleteConfirmation_Des').style.display = 'none';
+        });
+    }
+
+    // Event listener for delete buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteButtons_des = document.querySelectorAll('.btn-delete-des');
+        deleteButtons_des.forEach(button => {
+            button.addEventListener('click', function() {
+                const DestinationId = this.getAttribute('data-id-Des');
+                // Call function to confirm deletion
+                confirmDeleteDestination(DestinationId);
+            });
+        });
+    });
+</script>
+
+                  <!--------------------------------------------------------------------------------->
+                    <!-- --------------------------Update Destination-------------------------- -->
+                    <!-------------------------------------------------------------------------------->
+<script>
+       // <!--start working on fonctionalities -->  
+        // Function to open the update pop-up with current Destination information
+function openUpdatePopup_DES(DestinationId, Town, Descriptions, GPS, Country, Langue, Category, Purpose, Climat) {
+    document.getElementById('updateIdDes').value = DestinationId;
+    document.getElementById('updateTown').value = Town;
+    document.getElementById('updateDescriptions').value = Descriptions;
+    document.getElementById('updateGPS').value = GPS;
+    document.getElementById('updateCountry').value = Country;
+    document.getElementById('updateLangue').value = Langue;
+    document.getElementById('updateCategory').value = Category;
+    document.getElementById('updatePurpose').value = Purpose;
+    document.getElementById('updateClimat').value = Climat;
+    document.getElementById('updatePopup_Des').style.display = 'block';
+}
+function closeUpdatePopup_Des() {
+    document.getElementById('updatePopup_Des').style.display = 'none';
+}
+// Event listener for update buttons destination
+document.addEventListener('DOMContentLoaded', function() {
+    const updateButtons_Des = document.querySelectorAll('.btn-update-Des');
+    updateButtons_Des.forEach(button => {
+        button.addEventListener('click', function() {
+            const DestinationId = this.getAttribute('data-id-Des');
+            const Town = this.getAttribute('data-nom-ville');
+            const Descriptions = this.getAttribute('data-description-detaillee');
+            const GPS = this.getAttribute('data-coordonneesGPS');
+            const Country = this.getAttribute('data-pays');
+            const Langue = this.getAttribute('data-langueParlee');
+            const Category = this.getAttribute('data-categorie');
+            const Purpose = this.getAttribute('data-motivations');
+            const Climat = this.getAttribute('data-climat');
+
+            openUpdatePopup_DES(DestinationId, Town, Descriptions, GPS, Country, Langue, Category, Purpose, Climat);
+        });
+    });
+
+});
+const updateForm_Des = document.getElementById('updateForm_Des');
+updateForm_DES.addEventListener('submit', function(event) {
+    // Reset error messages
+    document.getElementById('updateTownError').textContent = '';
+    document.getElementById('updateDescriptionsError').textContent = '';
+    document.getElementById('updateGPSError').textContent = '';
+    document.getElementById('updateCountryError').textContent = '';
+    document.getElementById('updateCategoryError').textContent = '';
+    document.getElementById('updateLangueError').textContent = '';
+    document.getElementById('updatePurposeError').textContent = '';
+    document.getElementById('updateClimatError').textContent = ''; 
+});
+
+</script>   
+         <!--------------------------------------------------------------------------------->
+                                            <!-- ADD Destination-->
+                  <!---------------------------------------------------------------------------------> 
+ <script>
+ function closeAddDestinationPopup() {
+    document.getElementById('addDestinationPopup').style.display = 'none';
+ }
+ document.addEventListener('DOMContentLoaded', function() {
+        const addDestinationBtn = document.getElementById('addDestinationBtn');
+        const addDestinationPopup = document.getElementById('addDestinationPopup');
+        const addDestinationForm = document.getElementById('addDestinationForm');
+
+        addDestinationBtn.addEventListener('click', function() {
+          addDestinationPopup.style.display = 'block';
+        });
+
+        addDestinationPopup.addEventListener('submit', function(event) {
+            // Validate form inputs
+            const idDes_Des = document.getElementById('idDes_Des').value;
+            const Town = document.getElementById('Town').value;
+            const Det_Description = document.getElementById('Det_Description').value;
+            const GPS = new Date(document.getElementById('GPS').value);
+            const Country = new Date(document.getElementById('Country').value);
+            const Language = document.getElementById('Language').value;
+            const Category = document.getElementById('Category').value;
+            const Purpose = document.getElementById('Purpose').value;
+            const Climat = document.getElementById('Climat').value;
+
+            // Reset error messages
+            document.getElementById('idDes_DesError').textContent = '';
+            document.getElementById('TownError').textContent = '';
+            document.getElementById('Det_DescriptionError').textContent = '';
+            document.getElementById('GPSError').textContent = '';
+            document.getElementById('CountryError').textContent = '';
+            document.getElementById('LanguageError').textContent = '';
+            document.getElementById('CategoryError').textContent = '';
+            document.getElementById('PurposeError').textContent = '';
+            document.getElementById('ClimatError').textContent = '';
+            
+        });
+    });
+</script>    
+
+<!-- Div pour afficher la carte -->
+   
+    <!-- ------------Search------------- -->
+    <script>
+      const searchInput = document.getElementById("search");
+      const rows = document.querySelectorAll("tbody tr");
+      console.log(rows);
+      searchInput.addEventListener("keyup", function (event) {
+        const q = event.target.value.toLowerCase();
+        rows.forEach((row) => {
+          row.querySelector("td").textContent.toLowerCase().startsWith(q)
+            ? (row.style.display = "table-row")
+            : (row.style.display = "none");
+        });
+      });
+    </script>
+<!-- ------------TRI------------- -->
+<script>
+  th = document.getElementsByTagName('th');
+
+for(let c=0; c < th.length; c++){
+
+    th[c].addEventListener('click',item(c))
+}
+
+
+function item(c){
+
+    return function(){
+      console.log(c)
+      sortTable(c)
+    }
+}
+
+
+function sortTable(c) {
+  var table, rows, switching, i, x, y, shouldSwitch;
+  table = document.getElementById("tableVoyage");
+  switching = true;
+  /*Make a loop that will continue until
+  no switching has been done:*/
+  while (switching) {
+    //start by saying: no switching is done:
+    switching = false;
+    rows = table.rows;
+    /*Loop through all table rows (except the
+    first, which contains table headers):*/
+    for (i = 1; i < (rows.length - 1); i++) {
+      //start by saying there should be no switching:
+      shouldSwitch = false;
+      /*Get the two elements you want to compare,
+      one from current row and one from the next:*/
+      x = rows[i].getElementsByTagName("TD")[c];
+      y = rows[i + 1].getElementsByTagName("TD")[c];
+      //check if the two rows should switch place:
+      if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+        //if so, mark as a switch and break the loop:
+        shouldSwitch = true;
+        break;
+      }
+    }
+    if (shouldSwitch) {
+      /*If a switch has been marked, make the switch
+      and mark that a switch has been done:*/
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+    }
+  }
+}
+</script>
+<script>
+        function exportToPDF() {
+            // Create new jsPDF instance
+            const doc = new jsPDF();
+
+            // Extract data from the HTML table
+            const table = document.getElementById('tableVoyage');
+            const rows = table.querySelectorAll('tr');
+            const columns = ['ID_Voy', 'Titre', 'ID_Des', 'Date_Debut', 'Date_fin', 'Prix', 'Description','Motivation','Moyen_transport'];
+
+            // Prepare data for PDF
+            const data = [];
+            rows.forEach((row) => {
+                const rowData = [];
+                row.querySelectorAll('td').forEach((cell) => {
+                    rowData.push(cell.textContent.trim());
+                });
+                data.push(rowData);
+            });
+
+            // Add the table to the PDF
+            doc.autoTable({
+                head: [columns],
+                body: data,
+            });
+
+            // Save the PDF
+            doc.save('C:/Applications/XAMPP/xamppfiles/htdocs/TravisaWeam11/voyage_table.pdf');
+        }
+    </script>
+    <script>
+  // Parse travel statistics data from PHP to JavaScript
+  var travelCountByDestination = <?php echo $travelCountByDestinationJSON; ?>;
+  var avgTravelPriceByDestination = <?php echo $avgTravelPriceByDestinationJSON; ?>;
+  var travelCountByTransport = <?php echo $travelCountByTransportJSON; ?>;
+  var mostFrequentDurationByTransport = <?php echo $mostFrequentDurationByTransportJSON; ?>;
+
+  // Function to create a bar chart
+  function createBarChart(elementId, data) {
+    var ctx = document.getElementById(elementId).getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: data
+    });
+  }
+
+  // Function to create a pie chart
+  function createPieChart(elementId, data) {
+    var ctx = document.getElementById(elementId).getContext('2d');
+    new Chart(ctx, {
+      type: 'pie',
+      data: data
+    });
+  }
+
+  // Create charts
+  createBarChart('travelCountChart', {
+    labels: travelCountByDestination.map(row => row.id_des), // Assuming id_des is the identifier for destinations
+    datasets: [{
+      label: 'Travel Count by Destination',
+      data: travelCountByDestination.map(row => row.travel_count),
+      backgroundColor: 'rgba(54, 162, 235, 0.2)',
+      borderColor: 'rgba(54, 162, 235, 1)',
+      borderWidth: 1
+    }]
+  });
+
+  createBarChart('avgTravelPriceChart', {
+    labels: avgTravelPriceByDestination.map(row => row.id_des), // Assuming id_des is used for destinations again
+    datasets: [{
+      label: 'Average Travel Price by Destination',
+      data: avgTravelPriceByDestination.map(row => row.avg_price),
+      backgroundColor: 'rgba(255, 99, 132, 0.2)',
+      borderColor: 'rgba(255, 99, 132, 1)',
+      borderWidth: 1
+    }]
+  });
+
+  createBarChart('travelCountByTransportChart', {
+    labels: travelCountByTransport.map(row => row.moyen_transport),
+    datasets: [{
+      label: 'Travel Count by Transport Type',
+      data: travelCountByTransport.map(row => row.travel_count),
+      backgroundColor: 'rgba(255, 206, 86, 0.2)',
+      borderColor: 'rgba(255, 206, 86, 1)',
+      borderWidth: 1
+    }]
+  });
+  createPieChart('mostFrequentDurationByTransport', {
+  labels: travelCountByTransport.map(row => row.moyen_transport),
+  datasets: [{
+    label: 'Travel Count by Transport Type',
+    data: travelCountByTransport.map(row => row.travel_count),
+    backgroundColor: [
+      'rgba(255, 99, 132, 0.5)', // Orange
+      'rgba(54, 162, 235, 0.5)', // Blue
+      'rgba(255, 206, 86, 0.5)', // Yellow
+      'rgba(75, 192, 192, 0.5)', // Light blue
+      'rgba(153, 102, 255, 0.5)', // Purple
+      'rgba(255, 159, 64, 0.5)', // Orange red
+      // Add more colors if you have more transport types
+    ],
+    borderColor: 'rgba(221, 221, 221, 1)', // Light gray border
+    borderWidth: 1
+  }]
+});
+
+
+  // Assuming mostFrequentDurationByTransport is an object, extract data
+  var mostFrequentTransport = mostFrequentDurationByTransport.moyen_transport;
+  var avgDuration = mostFrequentDurationByTransport.avg_duration;
+
+  // Create a separate chart element (assuming you have one)
+  var frequentTransportChart = document.getElementById('frequentTransportChart'); // Update with your element ID
+  if (frequentTransportChart) {
+    frequentTransportChart.innerHTML = `Most Frequent Transport: ${mostFrequentTransport} (Average Duration: ${avgDuration.toFixed(2)} days)`; // Display data as text
+  } else {
+    console.warn('Element with ID "frequentTransportChart" not found for displaying most frequent transport data.');
+  }
+</script>
+
 
 </body>
 

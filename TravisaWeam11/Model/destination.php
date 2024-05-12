@@ -7,11 +7,11 @@ class destination {
     private string $pays;
     private string $langue;
     private string $motivation_destination;
-    private string $catégorie_destination;
+    private string $categorie_destination;
     private string $climat;
 
 
-    public function  __construct($id_des,$nom_ville,$description_detaille,$GPS,$pays,$motivation_destination,$catégorie_destination,$climat){
+    public function  __construct($id_des,$nom_ville,$description_detaille,$GPS,$pays,$motivation_destination,$categorie_destination,$climat){
         $this->$id_des = $id_des;
         $this->$nom_ville = $nom_ville;
         $this->$GPS = $GPS;
@@ -19,7 +19,7 @@ class destination {
         $this->$pays = $pays;
         $this->$langue = $langue;
         $this->$motivation_destination = $motivation_destination;
-        $this->$catégorie_destination = $catégorie_destination;
+        $this->$categorie_destination = $categorie_destination;
         $this->$climat = $climat;
     }
 
@@ -79,12 +79,12 @@ class destination {
         $this->motivation_destination = $motivation_destination;
     }
     
-    public function getCatégorieDestination(): string {
-        return $this->catégorie_destination;
+    public function getCategorieDestination(): string {
+        return $this->categorie_destination;
     }
     
-    public function setCatégorieDestination(string $catégorie_destination): void {
-        $this->catégorie_destination = $catégorie_destination;
+    public function setCategorieDestination(string $categorie_destination): void {
+        $this->categorie_destination = $categorie_destination;
     }
     
     

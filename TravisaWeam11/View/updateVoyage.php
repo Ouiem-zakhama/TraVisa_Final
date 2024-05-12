@@ -2,11 +2,11 @@
 
 require_once '../Controller/voyageC.php';
 
-if (isset($_POST['updateIdVoy'], $_POST['updateTitre'], $_POST['updateIdDes'], $_POST['updateDateDebut'], $_POST['updateDateFin'], $_POST['updatePrix'], $_POST['updateDescription'], $_POST['updateMotivation'], $_POST['updateMoyenTransport'])) {
+if (isset($_POST['updateIdVoy'], $_POST['updateTitre'], $_POST['updateDes'], $_POST['updateDateDebut'], $_POST['updateDateFin'], $_POST['updatePrix'], $_POST['updateDescription'], $_POST['updateMotivation'], $_POST['updateMoyenTransport'])) {
     // Extract the form data
     $idVoy = $_POST['updateIdVoy'];
     $titre = $_POST['updateTitre'];
-    $idDes = $_POST['updateIdDes'];
+    $idDes = $_POST['updateDes'];
     $dateDebut = $_POST['updateDateDebut'];
     $dateFin = $_POST['updateDateFin'];
     $prix = $_POST['updatePrix'];
